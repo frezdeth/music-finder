@@ -1,0 +1,53 @@
+import os
+import subprocess
+
+# List of artists
+artists = [
+    "pedja jovanovicv",
+    "oliver dragojevi",
+    "zeloko samardic",
+]
+
+# Optional: Change this to your USB drive letter
+usb_drive = "C"
+
+# Directory to store downloaded songs (before moving)
+download_dir = "downloads"
+os.makedirs(download_dir, exist_ok=True)
+
+# Loop through artists
+for artist in artists:
+    print(f"\n🎵 Downloading top songs for: {artist}")
+    
+    # Create a safe folder name for each artist
+    artist_folder = os.path.join(download_dir, artist.replace(" ", "_"))
+    os.makedirs(artist_folder, exist_ok=True)
+    
+    # YouTube search term
+    search_query = f"ytsearch20:{artist} top songs"
+    
+    # yt-dlp command
+    command = [
+        "yt-dlp",
+        search_query,
+        "--extract-audio",
+        "--audio-format", "mp3",
+        "-o", os.path.join(artist_folder, "%(title)s.%(ext)s")
+    ]
+    
+    subprocess.run(command)
+
+    # Optional: Move files to USB
+    if os.path.exists(usb_drive):
+        usb_artist_folder = os.path.join(usb_drive, artist.replace(" ", "_"))
+        os.makedirs(usb_artist_folder, exist_ok=True)
+        
+        for file in os.listdir(artist_folder):
+            src = os.path.join(artist_folder, file)
+            dst = os.path.join(usb_artist_folder, file)
+            os.rename(src, dst)
+        print(f"✅ Moved {artist}'s songs to USB.")
+    else:
+        print(f"⚠️ USB drive {usb_drive} not found — songs kept in local folder.")
+
+print("\n🎉 Done! All music downloaded.")
